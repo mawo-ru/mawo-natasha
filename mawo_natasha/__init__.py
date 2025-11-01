@@ -18,38 +18,78 @@ if str(_mawo_slovnet_path) not in sys.path:
     sys.path.insert(0, str(_mawo_slovnet_path))
 
 
+# Классы для работы с NLP структурами
+class Token:
+    """Токен - отдельное слово в тексте."""
+
+    def __init__(self, text: str, start: int, stop: int) -> None:
+        self.text = text
+        self.start = start
+        self.stop = stop
+
+
+class Sent:
+    """Предложение в тексте."""
+
+    def __init__(self, text: str, start: int, stop: int) -> None:
+        self.text = text
+        self.start = start
+        self.stop = stop
+
+
+class Span:
+    """Именованная сущность (NER span)."""
+
+    def __init__(self, start: int, stop: int, type: str, text: str) -> None:
+        self.start = start
+        self.stop = stop
+        self.type = type
+        self.text = text
+
+
 # Реальные классы для production NLP анализа
 class RealMawoDoc:
     """Real Document class для production качества."""
 
     def __init__(self, text: str = "") -> None:
-        if not text or not isinstance(text, str):
+        if not isinstance(text, str):
             msg = "Real production documents require valid text input"
             raise Exception(msg)
 
         self.text = text
-        self.sents = self._analyze_sentences(text)
-        self.tokens = self._tokenize(text)
-        self.spans: list[Any] = []
+        self.sents = self._analyze_sentences(text) if text else []
+        self.tokens = self._tokenize(text) if text else []
+        self.spans: list[Span] = []
 
-    def _analyze_sentences(self, text: str) -> list[str]:
+    def _analyze_sentences(self, text: str) -> list[Sent]:
         """Реальный анализ предложений для русского текста."""
-        # Простой но реальный анализ предложений
-        sentences: list[Any] = []
-        for sent in text.split("."):
-            sent = sent.strip()
-            if sent and len(sent) > 2:
-                sentences.append(sent)
+        sentences: list[Sent] = []
+        start = 0
+        for sent_text in text.split("."):
+            sent_text = sent_text.strip()
+            if sent_text and len(sent_text) > 2:
+                # Найти позицию в исходном тексте
+                idx = text.find(sent_text, start)
+                if idx >= 0:
+                    sentences.append(Sent(sent_text, idx, idx + len(sent_text)))
+                    start = idx + len(sent_text)
         return sentences
 
-    def _tokenize(self, text: str) -> list[str]:
+    def _tokenize(self, text: str) -> list[Token]:
         """Реальная токенизация русского текста."""
-        # Упрощенная но реальная токенизация
-        tokens: list[Any] = []
+        tokens: list[Token] = []
+        start = 0
         for word in text.split():
-            word = word.strip(".,!?;:()[]\"'")
-            if word and len(word) > 0:
-                tokens.append(word)
+            # Найти позицию слова в тексте
+            idx = text.find(word, start)
+            if idx >= 0:
+                # Очистить пунктуацию
+                cleaned = word.strip(".,!?;:()[]\"'")
+                if cleaned and len(cleaned) > 0:
+                    # Найти позицию очищенного слова
+                    clean_idx = word.find(cleaned)
+                    tokens.append(Token(cleaned, idx + clean_idx, idx + clean_idx + len(cleaned)))
+                start = idx + len(word)
         return tokens
 
 
@@ -84,7 +124,9 @@ class RealRussianEmbedding:
         if self.navec_embeddings:
             doc.embeddings = []
             for token in doc.tokens:
-                embedding = self.navec_embeddings.get_embedding(token)
+                # token is Token object, get text
+                token_text = token.text if hasattr(token, "text") else str(token)
+                embedding = self.navec_embeddings.get_embedding(token_text)
                 doc.embeddings.append(embedding)
 
         return doc
@@ -110,13 +152,14 @@ class RealRussianNERTagger:
         for entity_type, keywords in self.russian_entities.items():
             for keyword in keywords:
                 if keyword in text_lower:
+                    start_pos = text_lower.find(keyword)
                     doc.spans.append(
-                        {
-                            "type": entity_type,
-                            "start": text_lower.find(keyword),
-                            "end": text_lower.find(keyword) + len(keyword),
-                            "text": keyword,
-                        },
+                        Span(
+                            start=start_pos,
+                            stop=start_pos + len(keyword),
+                            type=entity_type,
+                            text=keyword,
+                        )
                     )
         return doc
 
@@ -134,9 +177,9 @@ class MAWODoc(RealMawoDoc):
 
     def segment(self) -> "MAWODoc":
         """Segment text with Russian cultural awareness."""
-        # Базовая сегментация
-        sentences = self.text.split(". ")
-        self.sents = [sent.strip() for sent in sentences if sent.strip()]
+        # Используем встроенную сегментацию из родительского класса
+        self.sents = self._analyze_sentences(self.text) if self.text else []
+        self.tokens = self._tokenize(self.text) if self.text else []
 
         # Применяем русскую оптимизацию
         self._apply_russian_boost()
@@ -173,7 +216,7 @@ except ImportError:
         return None
 
 
-__version__ = "1.6.0-mawo-cached"
+__version__ = "1.0.1"
 __author__ = "MAWO Team (based on Natasha by Alexander Kukushkin)"
 
 # Для обратной совместимости с оригинальным API
@@ -205,6 +248,9 @@ def setup_local_libs() -> Any:
 __all__ = [
     "Doc",
     "MAWODoc",  # Enhanced version with Russian optimization
+    "Token",
+    "Sent",
+    "Span",
     "NewsEmbedding",
     "NewsMorphTagger",
     "NewsNERTagger",
