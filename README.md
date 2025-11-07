@@ -323,19 +323,39 @@ pip install -e ".[dev]"
 pytest tests/
 ```
 
-## Благодарности
+## Благодарности и Upstream-проект
 
-Основано на **Natasha** и **Navec** от Alexander Kukushkin.
+**mawo-natasha** является форком оригинального проекта **[Natasha](https://github.com/natasha/natasha)**, разработанного **Александром Кукушкиным** ([@kuk](https://github.com/kuk)).
 
-**Улучшения MAWO:**
-- Интеграция с Navec embeddings
-- Offline-first архитектура
-- Интеграция с mawo-slovnet
-- Оптимизация памяти
+### Оригинальный проект
 
-## License
+- **Репозиторий**: https://github.com/natasha/natasha
+- **Автор**: Alexander Kukushkin
+- **Лицензия**: MIT
+- **Copyright**: (c) 2016 Alexander Kukushkin
 
-MIT License - see [LICENSE](LICENSE) file.
+### Связанные проекты Natasha
+
+Этот проект также использует другие компоненты экосистемы Natasha:
+
+- **Navec** (embeddings): Copyright (c) 2017 Alexander Kukushkin
+- **SlovNet** (модели): Copyright (c) 2017 Alexander Kukushkin
+- **Razdel** (токенизация): Copyright (c) 2017 Alexander Kukushkin
+
+### Улучшения MAWO
+
+- **Интеграция с Navec embeddings**: Автоматическая загрузка и работа
+- **Offline-first архитектура**: Полная автономность после первой загрузки
+- **Интеграция с mawo-slovnet**: Seamless работа с другими библиотеками MAWO
+- **Оптимизация памяти**: Эффективное использование ресурсов (~50МБ)
+
+**Полная информация об авторстве**: см. [ATTRIBUTION.md](ATTRIBUTION.md)
+
+## Лицензия
+
+MIT License - см. [LICENSE](LICENSE) файл.
+
+Этот проект полностью соответствует MIT лицензии оригинального проекта natasha и сохраняет все оригинальные copyright notices.
 
 ## Ссылки
 
