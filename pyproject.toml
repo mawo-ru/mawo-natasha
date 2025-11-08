@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mawo-natasha"
-version = "1.0.1"
+version = "1.0.2"
 description = "NER и семантический анализ для русского языка с Navec embeddings"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -81,11 +81,11 @@ target-version = ["py310", "py311", "py312"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py39"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "B", "UP"]
-ignore = ["E501"]
+select = ["E", "F", "I", "N", "W", "B"]
+ignore = ["E501", "N802"]
 
 [tool.mypy]
 python_version = "3.10"

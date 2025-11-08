@@ -19,6 +19,7 @@ import logging
 import shutil
 import tarfile
 from pathlib import Path
+from typing import List, Optional, Tuple
 from urllib.request import urlopen
 
 import numpy as np
@@ -46,7 +47,7 @@ class NavecDownloader:
         },
     }
 
-    def __init__(self, cache_dir: Path | str | None = None) -> None:
+    def __init__(self, cache_dir: Optional[Path] = None) -> None:
         """Initialize downloader.
 
         Args:
@@ -261,7 +262,7 @@ class NavecEmbeddings:
 
         self.navec = FallbackNavec()
 
-    def get_embedding(self, word: str) -> np.ndarray | None:
+    def get_embedding(self, word: str) -> Optional["np.ndarray"]:
         """Get word embedding.
 
         Args:
@@ -281,7 +282,7 @@ class NavecEmbeddings:
 
         return None
 
-    def get_embeddings(self, words: list[str]) -> list[np.ndarray | None]:
+    def get_embeddings(self, words: List[str]) -> List[Optional["np.ndarray"]]:
         """Get embeddings for multiple words.
 
         Args:
@@ -318,7 +319,7 @@ class NavecEmbeddings:
 
         return float(dot_product / (norm1 * norm2))
 
-    def most_similar(self, word: str, topn: int = 10) -> list[tuple[str, float]]:
+    def most_similar(self, word: str, topn: int = 10) -> List[Tuple[str, float]]:
         """Find most similar words (requires full navec library).
 
         Args:
@@ -337,7 +338,7 @@ class NavecEmbeddings:
 
 
 # Global instance for convenience
-_global_navec: NavecEmbeddings | None = None
+_global_navec: Optional[NavecEmbeddings] = None
 
 
 def get_navec_embeddings(model_name: str = "news_v1") -> NavecEmbeddings:
