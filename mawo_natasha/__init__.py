@@ -213,7 +213,7 @@ class RealMawoDoc:
 
         markup = tagger(self.text)
         self.spans = [
-            Span(start, stop, type_, self.text[start:stop]) for start, stop, type_ in markup.spans
+            Span(span.start, span.stop, span.type, self.text[span.start:span.stop]) for span in markup.spans
         ]
         self._envelop_span_tokens()
         self._envelop_sent_spans()
@@ -462,9 +462,6 @@ try:
         sys.path.insert(0, str(_mawo_slovnet_path))
 
     from mawo_slovnet import (
-        NewsEmbedding as _SlovnetEmbedding,
-    )
-    from mawo_slovnet import (
         NewsMorphTagger as _SlovnetMorphTagger,
     )
     from mawo_slovnet import (
@@ -482,17 +479,13 @@ try:
     NewsMorphTagger = _SlovnetMorphTagger
     NewsSyntaxParser = _SlovnetSyntaxParser
 
-    # NewsEmbedding - используем композитную реализацию
-    # RealRussianEmbedding для Navec + SlovnetEmbedding для моделей
-    def NewsEmbedding(use_navec: bool = True, use_slovnet: bool = False):
-        """Создать embedding (Navec или SlovNet).
+    # NewsEmbedding - используем MAWO реализацию
+    def NewsEmbedding(use_navec: bool = True):
+        """Создать embedding (Navec).
 
         Args:
             use_navec: Использовать Navec embeddings (MAWO реализация)
-            use_slovnet: Использовать SlovNet embeddings
         """
-        if use_slovnet:
-            return _SlovnetEmbedding()
         return RealRussianEmbedding(use_navec=use_navec)
 
 except ImportError as e:
